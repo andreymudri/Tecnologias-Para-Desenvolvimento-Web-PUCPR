@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase/config';
 
@@ -67,11 +67,15 @@ function Login() {
           {carregando ? 'Acessando...' : 'Acessar'}
         </button>
 
-        {erro && <p className="msg-erro">{erro}</p>}
+        <button
+          type="button"
+          onClick={() => navigate('/cadastro')}
+          disabled={carregando}
+        >
+          Registrar
+        </button>
 
-        <p className="link-secundario">
-          Não tem conta? <Link to="/cadastro">Cadastre-se</Link>
-        </p>
+        {erro && <p className="msg-erro">{erro}</p>}
       </form>
     </div>
   );
