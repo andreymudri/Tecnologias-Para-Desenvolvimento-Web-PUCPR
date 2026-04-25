@@ -1,70 +1,79 @@
-# Getting Started with Create React App
+# Tecnologias Para Desenvolvimento Web — PUCPR
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Aplicação React com 3 páginas (Cadastro, Login e Principal) integrada ao Firebase Authentication (e-mail/senha) e Firestore, com rotas em arquivo separado usando React Router DOM.
 
-## Available Scripts
+## Estrutura
 
-In the project directory, you can run:
+```
+src/
+  firebase/config.js      # Inicialização do Firebase (auth + Firestore)
+  routes/AppRoutes.js     # Definição das rotas
+  pages/
+    Cadastro.js           # Página 1 — cria usuário no Auth e grava dados no Firestore
+    Login.js              # Página 2 — valida credenciais e redireciona
+    Principal.js          # Página 3 — exibe nome, sobrenome e data de nascimento
+```
 
-### `npm start`
+## Pré-requisitos
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+1. Criar um projeto no [Firebase Console](https://console.firebase.google.com/).
+2. Em **Authentication → Sign-in method**, habilitar o provedor **E-mail/senha**.
+3. Em **Firestore Database**, criar o banco em modo de produção ou teste.
+4. Em **Project settings → Your apps**, registrar um app web e copiar as credenciais.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Configuração local
 
-### `npm test`
+Copie `.env.example` para `.env.local` e preencha com as credenciais do seu projeto Firebase:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```
+REACT_APP_FIREBASE_API_KEY=...
+REACT_APP_FIREBASE_AUTH_DOMAIN=...
+REACT_APP_FIREBASE_PROJECT_ID=...
+REACT_APP_FIREBASE_STORAGE_BUCKET=...
+REACT_APP_FIREBASE_MESSAGING_SENDER_ID=...
+REACT_APP_FIREBASE_APP_ID=...
+```
 
-### `npm run build`
+## Rodar em desenvolvimento
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+npm install
+npm start
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Aplicação em `http://localhost:3000`.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Build de produção
 
-### `npm run eject`
+```bash
+npm run build
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Os arquivos otimizados ficam em `build/`.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Deploy no Firebase Hosting
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+1. Instale a CLI (uma vez): `npm install -g firebase-tools`
+2. Faça login: `firebase login`
+3. Ajuste `.firebaserc` substituindo `REPLACE_WITH_YOUR_FIREBASE_PROJECT_ID` pelo ID real do seu projeto.
+4. Gere o build: `npm run build`
+5. Faça o deploy: `firebase deploy --only hosting`
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+A URL pública será exibida ao final (ex.: `https://SEU-PROJETO.web.app`).
 
-## Learn More
+### Alternativas de hospedagem
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+O projeto é um bundle estático (`build/`), compatível com qualquer host estático — Vercel, Netlify, GitHub Pages, Cloudflare Pages etc.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Regras mínimas sugeridas do Firestore
 
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /usuarios/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+  }
+}
+```
